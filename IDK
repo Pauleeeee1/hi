@@ -1,0 +1,10 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/fdvll/pet-simulator-99/main/waitForGameLoad.lua"))()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(179.69122314453125, 19.167766571044922, -139.83364868164062)
+wait(5)
+local SUS = workspace.__THINGS.__INSTANCE_CONTAINER.Active.Backrooms.GeneratedBackrooms.Walls
+SUS:Destroy()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-5124.67724609375, 1609.756591796875, -3712.291015625)
+wait(1)
+local ts = game:GetService("TeleportService")
+local p = game:GetService("Players").LocalPlayer
+ts:Teleport(game.PlaceId, p)
