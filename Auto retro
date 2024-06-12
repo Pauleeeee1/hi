@@ -1,0 +1,125 @@
+
+-- Locals
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local swordPart = character:WaitForChild("ClassicSword"):WaitForChild("SwordPart")
+local TokensFolder = Workspace:WaitForChild("Collectibles")
+
+local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
+
+local AutoCollectTokens = false
+local AutoKillMobs = false
+
+
+--[[for _, Token in ipairs(TokensFolder:GetChildren()) do
+    if Token:IsA("BasePart") then
+        Token:Destroy()
+    end
+end]]
+
+
+
+-- Function to tween to a target CFrame
+local function tweenToPosition(targetCFrame)
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    humanoidRootPart.Anchored = false
+    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = targetCFrame
+    --[[local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+    tween:Play()
+    tween.Completed:Wait()--]]
+    task.wait(0.4)
+    humanoidRootPart.Anchored = false
+end
+
+-- Function to collect all tokens
+local function CollectAllTokens()
+    while AutoCollectTokens do
+        for _, Token in ipairs(TokensFolder:GetChildren()) do
+            if Token:IsA("BasePart") and AutoCollectTokens then
+                local targetCFrame = Token.CFrame
+                tweenToPosition(targetCFrame)
+                Token:Destroy()
+            end
+        end
+        task.wait(0.5) -- Wait time between collection cycles to avoid excessive looping
+    end
+end
+
+-- Function to auto-kill mobs by resizing the sword
+local function AutoKill()
+    while AutoKillMobs == true do
+        swordPart.Size = Vector3.new(1000, 1000, 1000)
+        swordPart.CanCollide = false
+        wait(0.3)
+        swordPart.Size = Vector3.new(1, 1, 1)
+    end
+end
+
+-- Function to teleport to a plate and start auto-kill
+local function TPToPlate()
+    local part = Instance.new("Part")
+    part.Name = "PlayerStandPlate"
+    part.Position = Vector3.new(-47063, 320, 0)
+    part.Size = Vector3.new(10, 1, 10)
+    part.Anchored = true
+    part.CanCollide = true
+    part.Parent = Workspace
+    local targetCFrame = CFrame.new(-47063, 330, 0)
+    tweenToPosition(targetCFrame)
+    AutoKill()
+end
+
+-- OrionLib UI Setup
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Auto Retro", HidePremium = false, SaveConfig = false})
+
+local Tab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+Tab:AddButton({
+    Name = "Make Sword Better!",
+    Callback = function()
+        swordPart.Size = Vector3.new(1000, 1000, 100)
+        swordPart.CanCollide = false
+    end    
+})
+
+Tab:AddToggle({
+    Name = "Auto Kill (recommended)",
+    Default = false,
+    Callback = function(Value)
+        AutoKillMobs = Value
+        if AutoKillMobs then
+            TPToPlate()
+        end
+    end    
+})
+
+Tab:AddToggle({
+    Name = "Auto Collect Tokens (falgs sometimes)",
+    Default = false,
+    Callback = function(Value)
+        AutoCollectTokens = Value
+        if AutoCollectTokens then
+            CollectAllTokens()
+        end
+    end    
+})
+
+Tab:AddButton({
+    Name = "Unbug Player!",
+    Callback = function()
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        humanoidRootPart.Anchored = true
+    end    
+})
+
+
+OrionLib:Init()
