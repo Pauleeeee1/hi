@@ -110,7 +110,7 @@ Tab:AddToggle({
 	end    
 })
 
-TestTab:AddDropdown({
+Tab:AddDropdown({
 	Name = "Select Sword",
 	Default = "ClassicSword",
 	Options = {"ClassicSword", "ClassicFirebrand", "ClassicIllumina"},
@@ -119,7 +119,7 @@ TestTab:AddDropdown({
 	end    
 })
 
-Tab:AddButton({
+TestTab:AddButton({
 	Name = "Unbug Player!",
 	Callback = function()
 		local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
@@ -128,6 +128,37 @@ Tab:AddButton({
 		else
 			warn("HumanoidRootPart not found!")
 		end
+	end    
+})
+
+TestTab:AddButton({
+	Name = "No Lag",
+	Callback = function()
+		local player = game.Players.LocalPlayer
+		local character = player.Character or player.CharacterAdded:Wait()  -- Ensure character is loaded
+		print("Character loaded")
+
+		local sword = character:FindFirstChild(CurrentSword)
+		if sword then
+			print("Found "..CurrentSword)
+			local swordPart = sword:FindFirstChild("SwordPart")
+			if swordPart then
+				print("Found SwordPart")
+				local touchInterest = swordPart:FindFirstChild("TouchInterest")
+				if touchInterest then
+					print("Found TouchInterest")
+					touchInterest:Destroy()
+					print("TouchInterest destroyed")
+				else
+					print("TouchInterest not found")
+				end
+			else
+				print("SwordPart not found")
+			end
+		else
+			print(CurrentSword.." not found")
+		end
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/fdvll/pet-simulator-99/main/cpuReducer.lua"))()
 	end    
 })
 
