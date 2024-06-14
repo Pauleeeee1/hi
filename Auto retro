@@ -26,6 +26,7 @@ part.Parent = Workspace
 local function SetCurrentSword(va1)
 	CurrentSword = va1
 	print("Current sword set to:", va1)
+	game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer(CurrentSword)
 end
 
 -- Function to tween to a target CFrame
