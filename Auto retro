@@ -1,18 +1,20 @@
--- Locals
+-- Services
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PathfindingService = game:GetService("PathfindingService")
 
+-- Variables
 local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local TokensFolder = Workspace:WaitForChild("Collectibles")
 
 local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Linear)
-
 local AutoCollectTokens = false
 local AutoKillMobs = false
 local Tpcooldown = 10
-local CurrentSword = "ClassicSword"  -- Default value
+local CurrentSword = "ClassicSword"
 
 -- Create and position the player stand plate
 local part = Instance.new("Part")
@@ -23,22 +25,46 @@ part.Anchored = true
 part.CanCollide = true
 part.Parent = Workspace
 
+-- Set the current sword and notify the server
 local function SetCurrentSword(va1)
 	CurrentSword = va1
 	print("Current sword set to:", va1)
-	game:GetService("ReplicatedStorage").Events.PlayerActivesCommand:FireServer(CurrentSword)
+	ReplicatedStorage.Events.PlayerActivesCommand:FireServer(CurrentSword)
 end
 
 -- Function to tween to a target CFrame
 local function tweenToPosition(targetCFrame)
 	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 	if humanoidRootPart then
-		humanoidRootPart.Anchored = false
-		humanoidRootPart.CFrame = targetCFrame
-		task.wait(0.1)
-		humanoidRootPart.Anchored = false
+		local tween = TweenService:Create(humanoidRootPart, tweenInfo, {CFrame = targetCFrame})
+		tween:Play()
+		tween.Completed:Wait()
+		task.wait(1)
 	else
-		warn("HumanoidRootPart not found!")
+		print("HumanoidRootPart not found")
+	end
+end
+
+-- Function to move to a position using Pathfinding
+local function moveToPosition(targetCFrame)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+	if humanoid and humanoidRootPart then
+		local path = PathfindingService:CreatePath({
+			AgentRadius = 2,
+			AgentHeight = 5,
+			AgentCanJump = true,
+			AgentJumpHeight = humanoid.JumpHeight,
+			AgentMaxSlope = humanoid.MaxSlope
+		})
+		path:ComputeAsync(humanoidRootPart.Position, targetCFrame.Position)
+		local waypoints = path:GetWaypoints()
+		for _, waypoint in ipairs(waypoints) do
+			humanoid:MoveTo(waypoint.Position)
+			humanoid.MoveToFinished:Wait()
+		end
+	else
+		print("Humanoid or HumanoidRootPart not found")
 	end
 end
 
@@ -47,23 +73,29 @@ local function CollectAllTokens()
 	while AutoCollectTokens do
 		for _, Token in ipairs(TokensFolder:GetChildren()) do
 			if Token:IsA("BasePart") and AutoCollectTokens then
-				local targetCFrame = Token.CFrame
-				tweenToPosition(targetCFrame)
-				Token:Destroy()
+				if Token then
+					moveToPosition(Token.CFrame)
+					Token:Destroy()
+				end
 			end
 		end
-		task.wait(0.1) -- Wait time between collection cycles to avoid excessive looping
+		task.wait(0.1) -- Delay between collection cycles
 	end
 end
 
 -- Function to auto-kill mobs by resizing the sword
 local function AutoKill()
-	local swordPart = character:WaitForChild(CurrentSword):WaitForChild("SwordPart")
-	while AutoKillMobs do
-		swordPart.Size = Vector3.new(1000, 1000, 1000)
-		swordPart.CanCollide = false
-		task.wait(1)
-		swordPart.Size = Vector3.new(1, 1, 1)
+	local sword = character:FindFirstChild(CurrentSword)
+	if sword then
+		local swordPart = sword:FindFirstChild("SwordPart")
+		while AutoKillMobs and swordPart do
+			swordPart.Size = Vector3.new(1000, 1000, 1000)
+			swordPart.CanCollide = false
+			task.wait(1)
+			swordPart.Size = Vector3.new(1, 1, 1)
+		end
+	else
+		print("Sword not found")
 	end
 end
 
@@ -71,7 +103,18 @@ end
 local function TPToPlate()
 	local targetCFrame = CFrame.new(-47063, 330, 0)
 	tweenToPosition(targetCFrame)
-	AutoKill()
+	if AutoKillMobs then
+		AutoKill()
+	end
+end
+
+-- Function to set up auto-collect by clearing tokens initially
+local function SetUpautocollect()
+	for _, Token in ipairs(TokensFolder:GetChildren()) do
+		if Token:IsA("BasePart") then
+			Token:Destroy()
+		end
+	end
 end
 
 -- OrionLib UI Setup
@@ -83,6 +126,12 @@ local Tab = Window:MakeTab({
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
+local PlayerTab = Window:MakeTab({
+	Name = "Player Stuff",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
 
 local TestTab = Window:MakeTab({
 	Name = "Test stuff",
@@ -119,6 +168,26 @@ Tab:AddDropdown({
 	end    
 })
 
+
+PlayerTab:AddSlider({
+	Name = "WalkSpeed",
+	Min = 1,
+	Max = 100,
+	Default = 10,
+	Color = Color3.fromRGB(255, 255, 255),
+	Increment = 1,
+	ValueName = "Speed",
+	Callback = function(Value)
+		local humanoid = character:FindFirstChildOfClass("Humanoid")
+		humanoid.WalkSpeed = Value
+	end    
+})
+
+
+
+
+
+
 TestTab:AddButton({
 	Name = "Unbug Player!",
 	Callback = function()
@@ -128,6 +197,12 @@ TestTab:AddButton({
 		else
 			warn("HumanoidRootPart not found!")
 		end
+	end    
+})
+TestTab:AddButton({
+	Name = "Setup Auto Collect",
+	Callback = function()
+		SetUpautocollect()
 	end    
 })
 
