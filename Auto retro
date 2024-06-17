@@ -173,7 +173,7 @@ PlayerTab:AddSlider({
 	Name = "WalkSpeed",
 	Min = 1,
 	Max = 100,
-	Default = 10,
+	Default = 16,
 	Color = Color3.fromRGB(255, 255, 255),
 	Increment = 1,
 	ValueName = "Speed",
