@@ -11,6 +11,8 @@ local function GetNewPlayer()
 	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
 end
 
+_G.AutoFarm = false
+
 
 -- Define a function to get the stages
 local function getStages()
@@ -64,37 +66,64 @@ end
 
 -- Define a function to automate farming
 local function autoFarm()
-	Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
-	local Currenstage = 0
-	local mainStages = getStages()
-	if not mainStages then return end
+	while _G.AutoFarm == true do
+		task.wait(0.5)
+		Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
+		local Currenstage = 0
+		local mainStages = getStages()
+		if not mainStages then return end
+	
+		for _, child in ipairs(mainStages:GetChildren()) do
+			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
+				if child2.Name == "DarknessPart" then
+	
 
-	for _, child in ipairs(mainStages:GetChildren()) do
-		for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
-			if child2.Name == "DarknessPart" then
 
+					local position = child2.Position + TP_OFFSET
+					teleportPlayer(position)
+	
+					Currenstage = Currenstage + 1
 
-
-				local position = child2.Position + TP_OFFSET
-				teleportPlayer(position)
-
-				Currenstage = Currenstage + 1
-
-				task.wait(2)
-				if Currenstage == 3 then
-					local Player = Players.LocalPlayer
-					local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-					HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
-					wait(0.5)
-				end
-				if child.Name == "CaveStage10" then
-					Currenstage = 0
-					wait(0.5)
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/Pauleeeee1/hi/main/Auto%20Farm%20Badft"))()
+					task.wait(2)
+					if Currenstage == 3 then
+						local Player = Players.LocalPlayer
+						local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+						HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
+						wait(0.5)
+					end
+					if child.Name == "CaveStage10" then
+						Currenstage = 0
+					end
 				end
 			end
 		end
 	end
 end
-autoFarm()
 createParts()
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Babft Script"})
+
+
+local Tab = Window:MakeTab({
+	Name = "Auto Farn",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+Tab:AddToggle({
+	Name = "Auto Farm",
+	Default = false,
+	Callback = function(Value)
+		_G.AutoFarm = Value
+		autoFarm()
+	end    
+})
+
+
+Tab:AddButton({
+	Name = "Test run",
+	Callback = function()
+		autoFarm()
+	end    
+})
