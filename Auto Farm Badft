@@ -1,0 +1,102 @@
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+local OFFSET_POSITION = Vector3.new(0, -20, 0)
+local SIZE_INCREMENT = Vector3.new(10, 1, 10)
+local TP_OFFSET = Vector3.new(0, 5, 0)
+
+local function GetNewPlayer()
+	local Player = Players.LocalPlayer
+	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+end
+
+
+-- Define a function to get the stages
+local function getStages()
+	local stages = Workspace:FindFirstChild("BoatStages")
+	if not stages then
+		warn("BoatStages not found in Workspace")
+		return nil
+	end
+
+	local mainStages = stages:FindFirstChild("NormalStages")
+	if not mainStages then
+		warn("NormalStages not found in BoatStages")
+		return nil
+	end
+
+	return mainStages
+end
+
+-- Define a function to create parts
+local function createParts()
+	local mainStages = getStages()
+	if not mainStages then return end
+	local function createDarknessPart(parent, position)
+		local newPart = Instance.new("Part")
+		newPart.Parent = parent
+		newPart.Name = "Darkness Part"
+		newPart.Position = position + OFFSET_POSITION
+		newPart.Size = newPart.Size + SIZE_INCREMENT
+		newPart.Anchored = true
+		newPart.CanCollide = true
+		newPart.Transparency = 0
+	end
+
+	for _, child in ipairs(mainStages:GetChildren()) do
+		for _, child2 in ipairs(child:GetChildren()) do
+			if child2.Name == "DarknessPart" then
+				print(child2.Position)
+				createDarknessPart(child2, child2.Position)
+			end
+		end
+	end
+end
+
+
+-- Define a function to teleport the player
+local function teleportPlayer(position)
+	local Player = Players.LocalPlayer
+	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+	HumanoidRootPart.CFrame = CFrame.new(position)
+end
+
+-- Define a function to automate farming
+local function autoFarm()
+	local Currenstage = 0
+	local mainStages = getStages()
+	if not mainStages then return end
+
+	for _, child in ipairs(mainStages:GetChildren()) do
+		for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
+			if child2.Name == "DarknessPart" then
+
+
+
+				local position = child2.Position + TP_OFFSET
+				teleportPlayer(position)
+
+				Currenstage = Currenstage + 1
+				print(Currenstage)
+				print(child)
+
+
+				task.wait(2)
+				if Currenstage == 3 then
+					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
+					wait(0.5)
+				end
+				if child.Name == "CaveStage10" then
+					Currenstage = 0
+					wait(0.5)
+					autoFarm()
+					GetNewPlayer()
+					Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
+				end
+			end
+		end
+	end
+end
+autoFarm()
+createParts()
