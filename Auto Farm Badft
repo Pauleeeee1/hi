@@ -59,7 +59,11 @@ end
 local function teleportPlayer(position)
 	local Player = Players.LocalPlayer
 	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-	HumanoidRootPart.Anchored = true
+	if HumanoidRootPart.Anchored == true then
+		HumanoidRootPart.Anchored = false
+		wait(0.5)
+		HumanoidRootPart.Anchored = true
+	end 
 	HumanoidRootPart.CFrame = CFrame.new(position)
 end
 
@@ -83,7 +87,14 @@ local function autoFarm()
 
 				task.wait(2)
 				if Currenstage == 3 then
-					game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
+					local Player = Players.LocalPlayer
+					local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+					if HumanoidRootPart.Anchored == true then
+						HumanoidRootPart.Anchored = false
+						game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
+						wait(0.5)
+						HumanoidRootPart.Anchored = true
+					end
 					wait(0.5)
 				end
 				if child.Name == "CaveStage10" then
