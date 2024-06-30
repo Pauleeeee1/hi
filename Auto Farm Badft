@@ -64,6 +64,7 @@ end
 
 -- Define a function to automate farming
 local function autoFarm()
+	Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
 	local Currenstage = 0
 	local mainStages = getStages()
 	if not mainStages then return end
@@ -88,7 +89,6 @@ local function autoFarm()
 					Currenstage = 0
 					wait(0.5)
 					autoFarm()
-					Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
 				end
 			end
 		end
