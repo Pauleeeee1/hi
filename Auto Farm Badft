@@ -13,7 +13,7 @@ local function WaitfornewHumanoid()
 	if not HumanoidRootPart then
 		return
 	end
-	wait(0.5)
+	wait(.5)
 end
 _G.AutoFarm = false
 
@@ -92,7 +92,7 @@ local function autoFarm()
 						local Player = Players.LocalPlayer
 						local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
 						HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
-						wait(0.1)
+						wait(0.05)
 					end
 					if child.Name == "CaveStage10" then
 						Currenstage = 0
