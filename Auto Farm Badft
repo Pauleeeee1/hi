@@ -89,7 +89,7 @@ local function autoFarm()
 				if child.Name == "CaveStage10" then
 					Currenstage = 0
 					wait(0.5)
-					loadstring(game:HttpGet("https://raw.githubusercontent.com/Pauleeeee1/hi/main/Auto%20Farm%20Badft")()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/Pauleeeee1/hi/main/Auto%20Farm%20Badft"))()
 				end
 			end
 		end
