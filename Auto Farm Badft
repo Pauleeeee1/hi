@@ -4,7 +4,7 @@ local Player = Players.LocalPlayer
 
 local OFFSET_POSITION = Vector3.new(0, -20, 0)
 local SIZE_INCREMENT = Vector3.new(10, 1, 10)
-local TP_OFFSET = Vector3.new(0, 5, 0)
+local TP_OFFSET = Vector3.new(0, 0, 0)
 
 local function GetNewPlayer()
 	local Player = Players.LocalPlayer
@@ -59,6 +59,7 @@ end
 local function teleportPlayer(position)
 	local Player = Players.LocalPlayer
 	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+	HumanoidRootPart.Anchored = true
 	HumanoidRootPart.CFrame = CFrame.new(position)
 end
 
@@ -88,11 +89,10 @@ local function autoFarm()
 				if child.Name == "CaveStage10" then
 					Currenstage = 0
 					wait(0.5)
-					autoFarm()
+					loadstring(game:HttpGet("https://raw.githubusercontent.com/Pauleeeee1/hi/main/Auto%20Farm%20Badft")()
 				end
 			end
 		end
 	end
 end
 autoFarm()
-createParts()
