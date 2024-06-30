@@ -6,11 +6,15 @@ local OFFSET_POSITION = Vector3.new(0, -20, 0)
 local SIZE_INCREMENT = Vector3.new(10, 1, 10)
 local TP_OFFSET = Vector3.new(0, 0, 0)
 
-local function GetNewPlayer()
+local function WaitfornewHumanoid()
 	local Player = Players.LocalPlayer
-	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	if not HumanoidRootPart then
+		return
+	end
+	wait(0.5)
 end
-
 _G.AutoFarm = false
 
 
@@ -67,8 +71,7 @@ end
 -- Define a function to automate farming
 local function autoFarm()
 	while _G.AutoFarm == true do
-		task.wait(0.5)
-		Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
+		WaitfornewHumanoid()
 		local Currenstage = 0
 		local mainStages = getStages()
 		if not mainStages then return end
@@ -89,7 +92,7 @@ local function autoFarm()
 						local Player = Players.LocalPlayer
 						local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
 						HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
-						wait(0.5)
+						wait(0.1)
 					end
 					if child.Name == "CaveStage10" then
 						Currenstage = 0
@@ -97,6 +100,7 @@ local function autoFarm()
 				end
 			end
 		end
+		WaitfornewHumanoid()
 	end
 end
 createParts()
@@ -112,7 +116,7 @@ local Tab = Window:MakeTab({
 })
 
 Tab:AddToggle({
-	Name = "Auto Farm",
+	Name = "AutoFarm",
 	Default = false,
 	Callback = function(Value)
 		_G.AutoFarm = Value
@@ -121,9 +125,9 @@ Tab:AddToggle({
 })
 
 
-Tab:AddButton({
-	Name = "Test run",
-	Callback = function()
-		autoFarm()
-	end    
-})
+	Tab:AddButton({
+		Name = "Test run",
+		Callback = function()
+			autoFarm()
+		end
+	})
