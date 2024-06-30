@@ -78,9 +78,6 @@ local function autoFarm()
 				teleportPlayer(position)
 
 				Currenstage = Currenstage + 1
-				print(Currenstage)
-				print(child)
-
 
 				task.wait(2)
 				if Currenstage == 3 then
@@ -91,7 +88,6 @@ local function autoFarm()
 					Currenstage = 0
 					wait(0.5)
 					autoFarm()
-					GetNewPlayer()
 					Workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()	
 				end
 			end
