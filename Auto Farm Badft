@@ -92,7 +92,7 @@ local function autoFarm()
 						local Player = Players.LocalPlayer
 						local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
 						HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
-						wait(0.05)
+						wait(0.5)
 					end
 					if child.Name == "CaveStage10" then
 						Currenstage = 0
