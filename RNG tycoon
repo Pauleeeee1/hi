@@ -1,3 +1,5 @@
+_G.Webhook = "https://discord.com/api/webhooks/1261813452998180906/5iMRZyCbi52U7GSBxEq75_1Q-AMB64OxkWshqDrNyXZqXvUC-Pf3UKfclW75IWeVq5Kb"
+
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
@@ -78,11 +80,17 @@ local delete = {
 	"TestingObjects", "WEATHERMACHINE", "SPACETESTMODEL", "Wind", "Snow", "Snow2",
 	"Rain", "LEAF", "snow", "Beam", "Rorvik Outskirts", "New", "Perfect Lawn Old",
 	"TEST0", "Rock1", "Rock 4", "Sphere", "Process", "fireflies", "Baseplate",
-	"MeshPart", "NEW", "RollEf", "Dummy", "Conveyors for building", "SelectionBox",
-	"SpawnLocation"
+	"MeshPart", "NEW", "RollEf", "Dummy", "Conveyors for building", "SelectionBox"
 }
 
-wait(3) -- Wait for elements to load
+for _, name in ipairs(delete) do
+	local object = Workspace:FindFirstChild(name)
+	if object then
+		object:Destroy()
+	end
+end
+
+wait(0.1) -- Wait for elements to load
 
 -- Function to check if there are no cubes left
 local function noCubesLeft()
