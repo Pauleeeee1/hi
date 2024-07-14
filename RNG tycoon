@@ -28,7 +28,10 @@ local CubesToCollect = {
 	["Pastel Cube"] = true,
 	["Golden Cube"] = true,
 	["Glitch Cube"] = true,
-	["Spore Blossom"] = true
+	["Spore Blossom"] = true,
+	["Technosphere"] = true,
+	["Event Horizon"] = true,
+	["Stellar Nebula"] = true
 }
 
 local CubesCollected = {
@@ -41,7 +44,10 @@ local CubesCollected = {
 	["Pastel Cube"] = 0,
 	["Golden Cube"] = 0,
 	["Glitch Cube"] = 0,
-	["Spore Blossom"] = 0
+	["Spore Blossom"] = 0,
+	["Technosphere"] = 0,
+	["Event Horizon"] = 0,
+	["Stellar Nebula"] = 0
 }
 
 -- Custom debug print function
@@ -94,7 +100,7 @@ local delete = {
 	"SpawnLocation"
 }
 
-wait(1) -- Wait for elements to load
+wait(3) -- Wait for elements to load
 
 -- Function to check if there are no cubes left
 local function noCubesLeft()
