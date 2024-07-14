@@ -5,9 +5,7 @@ local TeleportService = game:GetService("TeleportService")
 
 local timetooktocollect = 0
 
-	
-
-
+-- Create safety net
 local safetynet = Instance.new("Part")
 safetynet.Name = "SafetyNet"
 safetynet.Anchored = true
@@ -15,40 +13,24 @@ safetynet.Parent = Workspace
 safetynet.Position = Vector3.new(-2300, 110, 1750)
 safetynet.Size = Vector3.new(1000, 1, 1000)
 
-
 wait(0.1)
 
 local CubesToCollect = {
-	["Luck Cube"] = true,
-	["Haste Cube"] = true,
-	["Speed Cube"] = true,
-	["Fortune Cube"] = true,
-	["Inferno Cube"] = true,
-	["Wealth Cube"] = true,
-	["Pastel Cube"] = true,
-	["Golden Cube"] = true,
-	["Glitch Cube"] = true,
-	["Spore Blossom"] = true,
-	["Technosphere"] = true,
-	["Event Horizon"] = true,
-	["Stellar Nebula"] = true
+	["Luck Cube"] = {collect = true, count = 0},
+	["Haste Cube"] = {collect = true, count = 0},
+	["Speed Cube"] = {collect = true, count = 0},
+	["Fortune Cube"] = {collect = true, count = 0},
+	["Inferno Cube"] = {collect = true, count = 0},
+	["Wealth Cube"] = {collect = true, count = 0},
+	["Pastel Cube"] = {collect = true, count = 0},
+	["Golden Cube"] = {collect = true, count = 0},
+	["Glitch Cube"] = {collect = true, count = 0},
+	["Spore Blossom"] = {collect = true, count = 0},
+	["Technosphere"] = {collect = true, count = 0},
+	["Event Horizon"] = {collect = true, count = 0},
+	["Stellar Nebula"] = {collect = true, count = 0}
 }
-
-local CubesCollected = {
-	["Luck Cube"] = 0,
-	["Haste Cube"] = 0,
-	["Speed Cube"] = 0,
-	["Fortune Cube"] = 0,
-	["Inferno Cube"] = 0,
-	["Wealth Cube"] = 0,
-	["Pastel Cube"] = 0,
-	["Golden Cube"] = 0,
-	["Glitch Cube"] = 0,
-	["Spore Blossom"] = 0,
-	["Technosphere"] = 0,
-	["Event Horizon"] = 0,
-	["Stellar Nebula"] = 0
-}
+local Totalcubes = 0
 
 -- Custom debug print function
 local function debugPrint(...)
@@ -57,15 +39,15 @@ local function debugPrint(...)
 	end
 end
 
--- Function to convert a table to a readable string format, filtering out entries with a value of 0
+-- Function to convert a table to a readable string format, listing entries vertically
 local function tableToString(tbl)
-	local result = "{"
+	local result = ""
 	for k, v in pairs(tbl) do
-		if v ~= 0 then
-			result = result .. k .. ": " .. v .. ", "
+		if v.count ~= 0 then
+			result = result .. k .. ": " .. v.count .. "\n"
 		end
 	end
-	return result:sub(1, -3) .. "}"
+	return result:sub(1, -2) -- Remove the last newline character
 end
 
 -- Function to teleport a part to the player's position
@@ -121,7 +103,8 @@ for _, child in pairs(Workspace:GetChildren()) do
 		local Hitbox = child:FindFirstChild("Hitbox")
 		if Hitbox then
 			debugPrint("Found Hitbox in:", child.Name)
-			CubesCollected[child.Name] = CubesCollected[child.Name] + 1
+			CubesToCollect[child.Name].count = CubesToCollect[child.Name].count + 1
+			Totalcubes = Totalcubes + 1
 			teleportToPlayer(Hitbox, player)
 		else
 			debugPrint("No Hitbox found in:", child.Name)
@@ -154,15 +137,13 @@ end
 
 -- Function to check if all values in a table are zero
 local function allValuesZero(tbl)
-	for _, v in pairs(tbl) do
-		if v ~= 0 then
+	for _, data in pairs(tbl) do
+		if data.count ~= 0 then
 			return false
 		end
 	end
 	return true
 end
-
-
 
 local function SendMessageEMBED(url, embed)
 	local http = game:GetService("HttpService")
@@ -201,7 +182,11 @@ local embed = {
 	["fields"] = {
 		{
 			["name"] = "Cubes Collected:",
-			["value"] = tableToString(CubesCollected)
+			["value"] = tableToString(CubesToCollect)
+		},
+		{
+			["name"] = "Total cubs collected:",
+			["value"] = Totalcubes
 		},
 		{
 			["name"] = "User:",
@@ -209,7 +194,7 @@ local embed = {
 		},
 		{
 			["name"] = "Time Took:",
-			["value"] = timetooktocollect.." (tooo lazy to add)"
+			["value"] = tostring(timetooktocollect) .. " (too lazy to add)"
 		}
 	},
 	["footer"] = {
@@ -217,11 +202,10 @@ local embed = {
 	}
 }
 
--- Only send the webhook if not all values in CubesCollected are zero
-if not allValuesZero(CubesCollected) then
+-- Only send the webhook if not all values in CubesToCollect are zero
+if not allValuesZero(CubesToCollect) then
 	SendMessageEMBED(url, embed)
 end
-
 
 wait(0.5)
 
@@ -262,7 +246,7 @@ local function attemptServerHop()
 end
 
 local serverhopped = false
-local maxAttempts = 5  -- Maximal three attempts for server hop
+local maxAttempts = 5 -- Maximal five attempts for server hop
 
 -- Attempt server hop up to maxAttempts times
 for attempt = 1, maxAttempts do
@@ -270,7 +254,7 @@ for attempt = 1, maxAttempts do
 	if serverhopped then
 		break
 	end
-	wait(2)  -- Wait 2 seconds before attempting again
+	wait(2) -- Wait 2 seconds before attempting again
 end
 
 -- If no server hop was successful, perform an alternative action
@@ -280,6 +264,3 @@ if not serverhopped then
 end
 
 debugPrint("Script finished")
-
-
-
