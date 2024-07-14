@@ -94,7 +94,7 @@ local delete = {
 	"SpawnLocation"
 }
 
-wait(3) -- Wait for elements to load
+wait(1) -- Wait for elements to load
 
 -- Function to check if there are no cubes left
 local function noCubesLeft()
