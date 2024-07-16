@@ -6,17 +6,50 @@ local OFFSET_POSITION = Vector3.new(0, -20, 0)
 local SIZE_INCREMENT = Vector3.new(10, 1, 10)
 local TP_OFFSET = Vector3.new(0, 0, 0)
 
+
+local function debugoutput()
+	if _G.DebugOutput then
+		DebugOutbut:AddLabel("Label")
+	end
+end
+
 local function WaitfornewHumanoid()
+	warn("Getting New Humanoid")
 	local Player = Players.LocalPlayer
 	local Character = Player.Character or Player.CharacterAdded:Wait()
 	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
-	if not HumanoidRootPart then
-		return
-	end
-	wait(.5)
-end
-_G.AutoFarm = false
+	local Humanoid = Character:WaitForChild("Humanoid")
+	
+	repeat
+		wait()
+	until Humanoid.Health ~= 10
 
+	warn("Player Died")
+	wait(1)
+	
+	local NewCharacter = Player.CharacterAdded:Wait()
+	local NewHumanoidRootPart = NewCharacter:WaitForChild("HumanoidRootPart")
+	local NewHumanoid = NewCharacter:WaitForChild("Humanoid")
+
+	repeat
+		wait()
+	until NewHumanoid.Health >= 100
+	warn("Found New Humanoid")
+	wait(0.5)
+end
+
+local function GetHumanoid()
+	local Player = Players.LocalPlayer
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	local Humanoid = Character:WaitForChild("Humanoid")
+
+	warn("Found Humanoid")
+	return Humanoid
+end
+
+_G.AutoFarm = false
+_G.DebugOutput = false
 
 -- Define a function to get the stages
 local function getStages()
@@ -47,13 +80,14 @@ local function createParts()
 		newPart.Size = newPart.Size + SIZE_INCREMENT
 		newPart.Anchored = true
 		newPart.CanCollide = true
-		newPart.Transparency = 0
+		newPart.Transparency = 1
 	end
 
 	for _, child in ipairs(mainStages:GetChildren()) do
 		for _, child2 in ipairs(child:GetChildren()) do
 			if child2.Name == "DarknessPart" then
-				print(child2.Position)
+				--print(child2.Position)
+				child2.Transparency = 1
 				createDarknessPart(child2, child2.Position)
 			end
 		end
@@ -67,31 +101,76 @@ local function teleportPlayer(position)
 	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
 	HumanoidRootPart.CFrame = CFrame.new(position)
 end
+function findgoldtrigger()
+	local mainStages = getStages()
+	if not mainStages then return end
+
+	local TheEnd = mainStages:FindFirstChild("TheEnd")
+	if not TheEnd then
+		warn("TheEnd stage not found")
+		return
+	end
+
+	local GoldenChest = TheEnd:FindFirstChild("GoldenChest")
+	if not GoldenChest then
+		warn("GoldenChest not found")
+		return
+	end
+
+	local TriggerPart = GoldenChest:FindFirstChild("Trigger")
+	if not TriggerPart then
+		warn("Trigger part not found in GoldenChest")
+		return
+	end
+	return TriggerPart
+end
+
+
+
+
+local function findTouchInterest()
+	local TriggerPart = findgoldtrigger()
+	if TriggerPart:FindFirstChild("TouchInterest") then
+		return TriggerPart.TouchInterest
+	else
+		warn("Waiting to Find TouchInterest")
+		TriggerPart.ChildAdded:Wait() -- Wait for a child to be added
+		warn("TouchInterest got Added")
+		return TriggerPart:FindFirstChild("TouchInterest") -- Return the newly added TouchInterest
+	end
+end
+
+local function collectgoldchest()
+	local Touch = findTouchInterest()
+	local GoldTrigger = findgoldtrigger()
+	if Touch then
+		local position = GoldTrigger.CFrame.Position
+		teleportPlayer(position)
+		wait(0.1)
+	else
+		warn("Touch interest not found!")
+	end
+end
+
 
 -- Define a function to automate farming
 local function autoFarm()
 	while _G.AutoFarm == true do
-		WaitfornewHumanoid()
 		local Currenstage = 0
 		local mainStages = getStages()
 		if not mainStages then return end
-	
 		for _, child in ipairs(mainStages:GetChildren()) do
 			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
 				if child2.Name == "DarknessPart" then
-	
-
-
+					
 					local position = child2.Position + TP_OFFSET
 					teleportPlayer(position)
-	
+
 					Currenstage = Currenstage + 1
 
 					task.wait(2)
-					if Currenstage == 3 then
-						local Player = Players.LocalPlayer
-						local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-						HumanoidRootPart.CFrame = CFrame.new(-55, -358, 9492)
+					if Currenstage == 4 then
+						collectgoldchest()
 						wait(0.5)
 					end
 					if child.Name == "CaveStage10" then
@@ -100,10 +179,17 @@ local function autoFarm()
 				end
 			end
 		end
-		WaitfornewHumanoid()
+		task.wait(3)
+		workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()
+		task.wait(0.5)
 	end
 end
 createParts()
+
+
+
+
+
 
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 local Window = OrionLib:MakeWindow({Name = "Babft Script"})
@@ -115,6 +201,7 @@ local Tab = Window:MakeTab({
 	PremiumOnly = false
 })
 
+
 Tab:AddToggle({
 	Name = "AutoFarm",
 	Default = false,
@@ -124,10 +211,3 @@ Tab:AddToggle({
 	end    
 })
 
-
-	Tab:AddButton({
-		Name = "Test run",
-		Callback = function()
-			autoFarm()
-		end
-	})
