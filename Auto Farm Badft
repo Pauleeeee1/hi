@@ -1,5 +1,6 @@
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
 local OFFSET_POSITION = Vector3.new(0, -20, 0)
@@ -198,7 +199,9 @@ local function CPUREDUZER()
 	local deleteList = {
 		"Water", "Sand", "WaterMarks", "BlackZone", "CamoZone", "MagentaZone", "New YellerZone", "Really blueZone", "Really redZone", "WhiteZone", "MainTerrain", "Teams"
 	}
-
+	local deleteListCore = {
+		"PlayerMenuScreen", "RobloxGui", "RobloxPromptGui", "TopBarApp", ""
+	}
 
 
 	-- Create a safety net part
@@ -214,9 +217,15 @@ local function CPUREDUZER()
 			child:Destroy()
 		end
 	end
+	for _, child in ipairs(CoreGui:GetChildren()) do
+		if table.find(deleteListCore, child.Name) then
+			child:Destroy()
+		end
+	end
 	if OtherStages then
 		OtherStages:Destroy()
 	end
+	setfpscap(10)
 end
 createParts()
 
@@ -249,5 +258,13 @@ Tab:AddButton({
 	Name = "CPU Reduzer",
 	Callback = function(Value)
 		CPUREDUZER()
+	end,
+})
+Tab:AddParagraph("READ THIS!","The CPU Reduzer is a OP Reduzer it will delete Most Stuff even Roblox Stuff so u wont be able to leave the game normaly")
+Tab:AddLabel("THANKS!")
+Tab:AddButton({
+	Name = "LEAVE",
+	Callback = function(Value)
+		game:GetService("CoreGui").HeadsetDisconnectedDialog.Enabled = true
 	end,
 })
