@@ -7,12 +7,6 @@ local SIZE_INCREMENT = Vector3.new(10, 1, 10)
 local TP_OFFSET = Vector3.new(0, 0, 0)
 
 
-local function debugoutput()
-	if _G.DebugOutput then
-		DebugOutbut:AddLabel("Label")
-	end
-end
-
 local function WaitfornewHumanoid()
 	warn("Getting New Humanoid")
 	local Player = Players.LocalPlayer
@@ -68,6 +62,20 @@ local function getStages()
 	return mainStages
 end
 
+local function getOtherStages()
+	local stages = Workspace:FindFirstChild("BoatStages")
+	if not stages then
+		warn("BoatStages not found in Workspace")
+		return nil
+	end
+	local OtherStages = stages:FindFirstChild("OtherStages")
+	if not OtherStages then
+		warn("NormalStages not found in BoatStages")
+		return nil
+	end
+
+	return OtherStages
+end
 -- Define a function to create parts
 local function createParts()
 	local mainStages = getStages()
@@ -184,6 +192,32 @@ local function autoFarm()
 		task.wait(0.5)
 	end
 end
+
+local function CPUREDUZER()
+	local OtherStages = getOtherStages()
+	local deleteList = {
+		"Water", "Sand", "WaterMarks", "BlackZone", "CamoZone", "MagentaZone", "New YellerZone", "Really blueZone", "Really redZone", "WhiteZone", "MainTerrain", "Teams"
+	}
+
+
+
+	-- Create a safety net part
+	local Safetynet = Instance.new("Part")
+	Safetynet.Anchored = true
+	Safetynet.Size = Vector3.new(10000, 1, 10000)
+	Safetynet.Position = Vector3.new(-53, -40, 331)
+	Safetynet.Parent = Workspace  -- Parent the safety net part to the Workspace
+
+	-- Iterate through the children of Workspace and delete matching items
+	for _, child in ipairs(Workspace:GetChildren()) do
+		if table.find(deleteList, child.Name) then
+			child:Destroy()
+		end
+	end
+	if OtherStages then
+		OtherStages:Destroy()
+	end
+end
 createParts()
 
 
@@ -211,3 +245,9 @@ Tab:AddToggle({
 	end    
 })
 
+Tab:AddButton({
+	Name = "CPU Reduzer",
+	Callback = function(Value)
+		CPUREDUZER()
+	end,
+})
