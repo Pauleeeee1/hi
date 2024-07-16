@@ -14,14 +14,14 @@ local function WaitfornewHumanoid()
 	local Character = Player.Character or Player.CharacterAdded:Wait()
 	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 	local Humanoid = Character:WaitForChild("Humanoid")
-	
+
 	repeat
 		wait()
 	until Humanoid.Health ~= 10
 
 	warn("Player Died")
 	wait(1)
-	
+
 	local NewCharacter = Player.CharacterAdded:Wait()
 	local NewHumanoidRootPart = NewCharacter:WaitForChild("HumanoidRootPart")
 	local NewHumanoid = NewCharacter:WaitForChild("Humanoid")
@@ -171,7 +171,7 @@ local function autoFarm()
 		for _, child in ipairs(mainStages:GetChildren()) do
 			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
 				if child2.Name == "DarknessPart" then
-					
+
 					local position = child2.Position + TP_OFFSET
 					teleportPlayer(position)
 
@@ -197,10 +197,20 @@ end
 local function CPUREDUZER()
 	local OtherStages = getOtherStages()
 	local deleteList = {
-		"Water", "Sand", "WaterMarks", "BlackZone", "CamoZone", "MagentaZone", "New YellerZone", "Really blueZone", "Really redZone", "WhiteZone", "MainTerrain", "Teams"
+		"Challenge", "Credits", "Obsticles", "Sound", "TempStuff", "CheckCodeFunction",
+		"DelayShutDown", "FollowFunction", "GiftNotificationRF", "HideTagFunction",
+		"InstaLoadFunction", "ItemBoughtFromShop", "LockFuction", "MuteMusicRemote",
+		"SaveBoatData", "PromptRobuxEvent", "SettingFunction", "ShareRemote",
+		"BattleTimerCount", "ChallengeRestrictionMessageEvent", "ChangeCharacter",
+		"ChangeTeam", "ClearAllPlayersBoatParts", "InviteChallengeEvent", "LoadBoatData",
+		"PVPRemote", "QuestMakerEvent", "RefreshLocks", "SavePlayerData", "SaveShopStyle",
+		"TurnOffLoadingEvent", "TutorialEvent", "UpdateControllerBindingInfo",
+		"UpdateLastGiftedIDRE", "UpdateSlotColorRE", "UpdateSlotNameRE", "UpdateSlotOrderRE",
+		"UpdateSpeedBuildStats", "BlackZone", "CamoZone", "MagentaZone", "New YellerZone",
+		"Really blueZone", "Really redZone", "Sand", "Water", "WhiteZone", "Teams", "WaterMask", "MainTerrain"
 	}
 	local deleteListCore = {
-		"PlayerMenuScreen", "RobloxGui", "RobloxPromptGui", "TopBarApp", ""
+		"PlayerMenuScreen", "RobloxGui", "RobloxPromptGui", "TopBarApp", "DevConsoleMaster"
 	}
 
 
@@ -225,7 +235,8 @@ local function CPUREDUZER()
 	if OtherStages then
 		OtherStages:Destroy()
 	end
-	setfpscap(10)
+	Workspace.BoatStages.NormalStages.ForestStage:Destroy()
+	setfpscap(20)
 end
 createParts()
 
