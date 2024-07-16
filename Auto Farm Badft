@@ -225,11 +225,17 @@ local function CPUREDUZER()
 	for _, child in ipairs(Workspace:GetChildren()) do
 		if table.find(deleteList, child.Name) then
 			child:Destroy()
+			if child then
+				child:Destroy()
+			end
 		end
 	end
 	for _, child in ipairs(CoreGui:GetChildren()) do
 		if table.find(deleteListCore, child.Name) then
 			child:Destroy()
+			if child then
+				child:Destroy()
+			end
 		end
 	end
 	if OtherStages then
