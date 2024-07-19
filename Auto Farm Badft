@@ -227,22 +227,32 @@ end
 
 local function autofarmtween()
 	while _G.AutoFarmTween == true do
-		local currentstage = 0
-		local mainstages = getStages()
-		if not mainstages then return print("No Mainstages?") end
-		for _, child in ipairs(mainstages:GetChildre()) do
+		local Currenstage = 0
+		local mainStages = getStages()
+		if not mainStages then return end
+		for _, child in ipairs(mainStages:GetChildren()) do
 			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
 				if child2.Name == "DarknessPart" then
-					local position = child2.Position
+
+					local position = child2.Position + TP_OFFSET
 					TweenPlayer(position)
+
+					Currenstage = Currenstage + 1
+
+					task.wait(2)
+					if Currenstage == 4 then
+						print("Wont Collect Chest")
+						wait(0.5)
+					end
 					if child.Name == "CaveStage10" then
-						currentstage = 0
+						Currenstage = 0
 					end
 				end
 			end
 		end
 		collectgoldchest()
-		task.wait(6)
+		wait(6)
+		task.wait(0.5)
 		workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()
 		task.wait(0.5)
 	end
