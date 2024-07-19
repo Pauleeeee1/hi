@@ -9,7 +9,6 @@ local SIZE_INCREMENT = Vector3.new(10, 1, 10)
 local TP_OFFSET = Vector3.new(0, 0, 0)
 
 
-
 local function GetHumanoid()
 	local Player = Players.LocalPlayer
 	local Character = Player.Character or Player.CharacterAdded:Wait()
@@ -40,6 +39,7 @@ end
 _G.AutoFarmTween = false
 _G.AutoFarm = false
 _G.DebugOutput = false
+_G.collectgoldafterdie = false
 
 -- Define a function to get the stages
 local function getStages()
@@ -187,8 +187,10 @@ local function autoFarm()
 		end
 		task.wait(0.3)
 		MonitorHumanoidPosition()
-		task.wait(1)
-		workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()
+		if _G.collectgoldafterdie then
+			game:GetService("Workspace"):WaitForChild("ClaimRiverResultsGold"):FireServer()
+			task.wait(0.3)
+		end
 		task.wait(1)
 	end
 end
@@ -261,14 +263,14 @@ local Farm = Window:MakeTab({
 	PremiumOnly = false
 })
 
-local Self = Window:MakeTab({
-	Name = "Self Made",
+local Reduzer = Window:MakeTab({
+	Name = "REDUZER",
 	Icon = "rbxassetid://4483345998",
 	PremiumOnly = false
 })
 
 
-Self:AddToggle({
+Farm:AddToggle({
 	Name = "AutoFarm (Good Gold / Gold Block)",
 	Default = false,
 	Callback = function(Value)
@@ -278,25 +280,36 @@ Self:AddToggle({
 })
 
 
+Farm:AddToggle({
+	Name = "Auto Collect Gold (maybe more gold)",
+	Default = false,
+	Callback = function(Value)
+		_G.collectgoldafterdie = Value
+	end    
+})
 
-Self:AddButton({
+
+
+
+
+
+
+
+
+
+Reduzer:AddButton({
 	Name = "CPU Reduzer",
 	Callback = function(Value)
 		CPUREDUZER()
 	end,
 })
-Farm:AddLabel("TOOO LAZY TO ADD SOMETHING HERE!")
-Self:AddParagraph("READ THIS!","The CPU Reduzer is a OP Reduzer it will delete Most Stuff even Roblox Stuff so u wont be able to leave the game normaly")
-Self:AddLabel("THANKS!")
-Self:AddButton({
+Farm:AddLabel("TOOO LAZY TO ADD MORE!")
+Reduzer:AddParagraph("READ THIS!","The CPU Reduzer is a OP Reduzer it will delete Most Stuff even Roblox Stuff so u wont be able to leave the game normaly")
+Reduzer:AddLabel("THANKS!")
+
+Reduzer:AddButton({
 	Name = "LEAVE",
 	Callback = function(Value)
-		game:GetService("CoreGui").HeadsetDisconnectedDialog.Enabled = true
-	end,
-})
-Self:AddButton({
-	Name = "test",
-	Callback = function(Value)
-		game.Players.LocalPlayer.DisplayName="User"local a=loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()local b=a:MakeWindow({Name="coords finder v2"})local c=b:MakeTab({Name="Main",Icon="rbxassetid://6031302918",PremiumOnly=false})local d=c:AddLabel("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))spawn(function()while task.wait()do d:Change("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))end end)c:AddButton({Name="Copy Position",Callback=function()setclipboard(tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position))a:MakeNotification({Name="Copied",Content="Position copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})c:AddButton({Name="Generate Teleport Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard("game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new("..e..")")a:MakeNotification({Name="Copied",Content="Teleport script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})local f;c:AddSlider({Name="Tween Time",Min=0,Max=50,Default=3,Increment=0.5,ValueName="Seconds",Callback=function(g)f=g end})c:AddButton({Name="Generate Tween Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard('tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new('..f..', Enum.EasingStyle.Linear)\ntweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new('..e..')}):Play()')a:MakeNotification({Name="Copied",Content="Tween script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})
+		Player:Kick("BANNED")
 	end,
 })
