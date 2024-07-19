@@ -320,9 +320,17 @@ local Self = Window:MakeTab({
 	PremiumOnly = false
 })
 
+Farm:AddToggle({
+	Name = "AutoFarm (Tween)",
+	Default = false,
+	Callback = function(Value)
+		_G.AutoFarmTween = Value
+		autoFarm()
+	end    
+})
 
 Self:AddToggle({
-	Name = "AutoFarm",
+	Name = "AutoFarm (Good Gold / Gold Block)",
 	Default = false,
 	Callback = function(Value)
 		_G.AutoFarm = Value
@@ -330,14 +338,7 @@ Self:AddToggle({
 	end    
 })
 
-Farm:AddToggle({
-	Name = "AutoFarm",
-	Default = false,
-	Callback = function(Value)
-		_G.AutoFarmTween = Value
-		autoFarm()
-	end    
-})
+
 
 Self:AddButton({
 	Name = "CPU Reduzer",
