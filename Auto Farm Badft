@@ -229,7 +229,7 @@ local function autofarmtween()
 	while _G.AutoFarmTween == true do
 		local currentstage = 0
 		local mainstages = getStages()
-		if not mainstages then return end
+		if not mainstages then return print("No Mainstages?") end
 		for _, child in ipairs(mainstages:GetChildre()) do
 			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
 				if child2.Name == "DarknessPart" then
