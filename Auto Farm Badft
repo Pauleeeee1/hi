@@ -1,2 +1,302 @@
-game.Players.LocalPlayer.DisplayName="User"local a=loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()local b=a:MakeWindow({Name="coords finder v2"})local c=b:MakeTab({Name="Main",Icon="rbxassetid://6031302918",PremiumOnly=false})local d=c:AddLabel("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))spawn(function()while task.wait()do d:Change("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))end end)c:AddButton({Name="Copy Position",Callback=function()setclipboard(tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position))a:MakeNotification({Name="Copied",Content="Position copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})c:AddButton({Name="Generate Teleport Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard("game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new("..e..")")a:MakeNotification({Name="Copied",Content="Teleport script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})local f;c:AddSlider({Name="Tween Time",Min=0,Max=50,Default=3,Increment=0.5,ValueName="Seconds",Callback=function(g)f=g end})c:AddButton({Name="Generate Tween Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard('tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new('..f..', Enum.EasingStyle.Linear)\ntweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new('..e..')}):Play()')a:MakeNotification({Name="Copied",Content="Tween script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})
-print("test")
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local tweenService = game:GetService("TweenService")
+local Player = Players.LocalPlayer
+
+local OFFSET_POSITION = Vector3.new(0, -20, 0)
+local SIZE_INCREMENT = Vector3.new(10, 1, 10)
+local TP_OFFSET = Vector3.new(0, 0, 0)
+
+
+
+local function GetHumanoid()
+	local Player = Players.LocalPlayer
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	local Humanoid = Character:WaitForChild("Humanoid")
+
+	warn("Found Humanoid")
+	return Humanoid, HumanoidRootPart
+end
+
+local function MonitorHumanoidPosition()
+	local Humanoid, HumanoidRootPart = GetHumanoid()
+
+	local lastPosition = HumanoidRootPart.Position
+
+	HumanoidRootPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+		local currentPosition = HumanoidRootPart.Position
+		if currentPosition ~= lastPosition then
+			warn("Humanoid position changed")
+			-- You can add more logic here to handle the position change
+			lastPosition = currentPosition
+		end
+	end)
+end
+
+
+
+_G.AutoFarmTween = false
+_G.AutoFarm = false
+_G.DebugOutput = false
+
+-- Define a function to get the stages
+local function getStages()
+	local stages = Workspace:FindFirstChild("BoatStages")
+	if not stages then
+		warn("BoatStages not found in Workspace")
+		return nil
+	end
+
+	local mainStages = stages:FindFirstChild("NormalStages")
+	if not mainStages then
+		warn("NormalStages not found in BoatStages")
+		return nil
+	end
+
+	return mainStages
+end
+
+local function getOtherStages()
+	local stages = Workspace:FindFirstChild("BoatStages")
+	if not stages then
+		warn("BoatStages not found in Workspace")
+		return nil
+	end
+	local OtherStages = stages:FindFirstChild("OtherStages")
+	if not OtherStages then
+		warn("NormalStages not found in BoatStages")
+		return nil
+	end
+
+	return OtherStages
+end
+-- Define a function to create parts
+local function createParts()
+	local mainStages = getStages()
+	if not mainStages then return end
+	local function createDarknessPart(parent, position)
+		local newPart = Instance.new("Part")
+		newPart.Parent = parent
+		newPart.Name = "Darkness Part"
+		newPart.Position = position + OFFSET_POSITION
+		newPart.Size = newPart.Size + SIZE_INCREMENT
+		newPart.Anchored = true
+		newPart.CanCollide = true
+		newPart.Transparency = 1
+	end
+
+	for _, child in ipairs(mainStages:GetChildren()) do
+		for _, child2 in ipairs(child:GetChildren()) do
+			if child2.Name == "DarknessPart" then
+				--print(child2.Position)
+				child2.Transparency = 1
+				createDarknessPart(child2, child2.Position)
+			end
+		end
+	end
+end
+
+
+-- Define a function to teleport the player
+local function teleportPlayer(position)
+	wait(0.2)
+	local Player = Players.LocalPlayer
+	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
+	HumanoidRootPart.CFrame = CFrame.new(position)
+end
+
+function findgoldtrigger()
+	local mainStages = getStages()
+	if not mainStages then return end
+
+	local TheEnd = mainStages:FindFirstChild("TheEnd")
+	if not TheEnd then
+		warn("TheEnd stage not found")
+		return
+	end
+
+	local GoldenChest = TheEnd:FindFirstChild("GoldenChest")
+	if not GoldenChest then
+		warn("GoldenChest not found")
+		return
+	end
+
+	local TriggerPart = GoldenChest:FindFirstChild("Trigger")
+	if not TriggerPart then
+		warn("Trigger part not found in GoldenChest")
+		return
+	end
+	return TriggerPart
+end
+
+
+
+
+local function findTouchInterest()
+	local TriggerPart = findgoldtrigger()
+	if TriggerPart:FindFirstChild("TouchInterest") then
+		return TriggerPart.TouchInterest
+	else
+		warn("Waiting to Find TouchInterest")
+		TriggerPart.ChildAdded:Wait() -- Wait for a child to be added
+		warn("TouchInterest got Added")
+		return TriggerPart:FindFirstChild("TouchInterest") -- Return the newly added TouchInterest
+	end
+end
+
+local function collectgoldchest()
+	local Touch = findTouchInterest()
+	local GoldTrigger = findgoldtrigger()
+	if Touch then
+		local position = GoldTrigger.CFrame.Position
+		warn("Collected Chest")
+		teleportPlayer(position)
+		wait(0.1)
+	else
+		warn("Touch interest not found!")
+	end
+end
+
+
+-- Define a function to automate farming
+local function autoFarm()
+	while _G.AutoFarm == true do
+		local Currenstage = 0
+		local mainStages = getStages()
+		if not mainStages then return end
+		for _, child in ipairs(mainStages:GetChildren()) do
+			for _, child2 in ipairs(child:GetChildren("DarknessPart")) do
+				if child2.Name == "DarknessPart" then
+
+					local position = child2.Position + TP_OFFSET
+					teleportPlayer(position)
+					Currenstage = Currenstage + 1
+					--warn("Going to stage: "..Currenstage)
+					task.wait(2)
+					if Currenstage == 4 then
+						collectgoldchest()
+						wait(0.5)
+					end
+					if child.Name == "CaveStage10" then
+						Currenstage = 0
+					end
+				end
+			end
+		end
+		task.wait(0.3)
+		MonitorHumanoidPosition()
+		task.wait(1)
+		workspace:WaitForChild("ClaimRiverResultsGold"):FireServer()
+		task.wait(1)
+	end
+end
+
+
+
+local function CPUREDUZER()
+	local OtherStages = getOtherStages()
+	local deleteList = {
+		"Challenge", "Credits", "Obsticles", "Sound", "TempStuff", "CheckCodeFunction",
+		"DelayShutDown", "FollowFunction", "GiftNotificationRF", "HideTagFunction",
+		"InstaLoadFunction", "ItemBoughtFromShop", "LockFuction", "MuteMusicRemote",
+		"SaveBoatData", "PromptRobuxEvent", "SettingFunction", "ShareRemote",
+		"BattleTimerCount", "ChallengeRestrictionMessageEvent", "ChangeCharacter",
+		"ChangeTeam", "ClearAllPlayersBoatParts", "InviteChallengeEvent", "LoadBoatData",
+		"PVPRemote", "QuestMakerEvent", "RefreshLocks", "SavePlayerData", "SaveShopStyle",
+		"TurnOffLoadingEvent", "TutorialEvent", "UpdateControllerBindingInfo",
+		"UpdateLastGiftedIDRE", "UpdateSlotColorRE", "UpdateSlotNameRE", "UpdateSlotOrderRE",
+		"UpdateSpeedBuildStats", "BlackZone", "CamoZone", "MagentaZone", "New YellerZone",
+		"Really blueZone", "Really redZone", "Sand", "Water", "WhiteZone", "Teams", "WaterMask", "MainTerrain"
+	}
+	local deleteListCore = {
+		"PlayerMenuScreen", "RobloxGui", "RobloxPromptGui", "TopBarApp", "DevConsoleMaster"
+	}
+
+
+	-- Create a safety net part
+	local Safetynet = Instance.new("Part")
+	Safetynet.Anchored = true
+	Safetynet.Size = Vector3.new(10000, 1, 10000)
+	Safetynet.Position = Vector3.new(-53, -40, 331)
+	Safetynet.Parent = Workspace  -- Parent the safety net part to the Workspace
+
+	-- Iterate through the children of Workspace and delete matching items
+	for _, child in ipairs(Workspace:GetChildren()) do
+		if table.find(deleteList, child.Name) then
+			child:Destroy()
+			if child then
+				child:Destroy()
+			end
+		end
+	end
+	for _, child in ipairs(CoreGui:GetChildren()) do
+		if table.find(deleteListCore, child.Name) then
+			child:Destroy()
+			if child then
+				child:Destroy()
+			end
+		end
+	end
+	if OtherStages then
+		OtherStages:Destroy()
+	end
+	Workspace.BoatStages.NormalStages.ForestStage:Destroy()
+	setfpscap(20)
+end
+createParts()
+
+
+
+
+
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Babft Script"})
+
+local Farm = Window:MakeTab({
+	Name = "Auto Farm",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Self = Window:MakeTab({
+	Name = "Self Made",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+
+Self:AddToggle({
+	Name = "AutoFarm (Good Gold / Gold Block)",
+	Default = false,
+	Callback = function(Value)
+		_G.AutoFarm = Value
+		autoFarm()
+	end    
+})
+
+
+
+Self:AddButton({
+	Name = "CPU Reduzer",
+	Callback = function(Value)
+		CPUREDUZER()
+	end,
+})
+Farm:AddLabel("TOOO LAZY TO ADD SOMETHING HERE!")
+Self:AddParagraph("READ THIS!","The CPU Reduzer is a OP Reduzer it will delete Most Stuff even Roblox Stuff so u wont be able to leave the game normaly")
+Self:AddLabel("THANKS!")
+Self:AddButton({
+	Name = "LEAVE",
+	Callback = function(Value)
+		game:GetService("CoreGui").HeadsetDisconnectedDialog.Enabled = true
+	end,
+})
+Self:AddButton({
+	Name = "test",
+	Callback = function(Value)
+		game.Players.LocalPlayer.DisplayName="User"local a=loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()local b=a:MakeWindow({Name="coords finder v2"})local c=b:MakeTab({Name="Main",Icon="rbxassetid://6031302918",PremiumOnly=false})local d=c:AddLabel("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))spawn(function()while task.wait()do d:Change("Position: "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.X))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Y))..", "..tostring(math.floor(game.Players.LocalPlayer.Character.HumanoidRootPart.Position.Z)))end end)c:AddButton({Name="Copy Position",Callback=function()setclipboard(tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position))a:MakeNotification({Name="Copied",Content="Position copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})c:AddButton({Name="Generate Teleport Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard("game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new("..e..")")a:MakeNotification({Name="Copied",Content="Teleport script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})local f;c:AddSlider({Name="Tween Time",Min=0,Max=50,Default=3,Increment=0.5,ValueName="Seconds",Callback=function(g)f=g end})c:AddButton({Name="Generate Tween Script",Callback=function()local e=tostring(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)setclipboard('tweenService, tweenInfo = game:GetService("TweenService"), TweenInfo.new('..f..', Enum.EasingStyle.Linear)\ntweenService:Create(game:GetService("Players")["LocalPlayer"].Character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new('..e..')}):Play()')a:MakeNotification({Name="Copied",Content="Tween script copied to clipboard",Image="rbxassetid://6023426945",Duration=5})end})
+	end,
+})
