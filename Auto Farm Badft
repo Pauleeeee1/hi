@@ -235,6 +235,9 @@ local function autofarmtween()
 				if child2.Name == "DarknessPart" then
 					local position = child2.Position
 					TweenPlayer(position)
+					if child.Name == "CaveStage10" then
+						currentstage = 0
+					end
 				end
 			end
 		end
