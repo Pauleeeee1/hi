@@ -1,0 +1,210 @@
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local function debugPrint(...)
+	if _G.DebugMode == true then
+		print("[DEBUG]", ...)
+	end
+end
+
+-- Zugriff auf verschachtelte Dienste und Sammlungen
+local Things = Workspace:FindFirstChild("__THINGS")
+debugPrint("Things:", Things)
+
+local DIRECTORY = ReplicatedStorage:FindFirstChild("__DIRECTORY")
+debugPrint("DIRECTORY", DIRECTORY)
+
+local function improveFPScurrenbreakables()
+	if Things then
+		local Breakables = Things:FindFirstChild("Breakables")
+		debugPrint("Breakables:", Breakables)
+
+		if Breakables then
+			-- Diese Variable speichert die MeshPart-Objekte für die Bearbeitung
+			local meshPartsToClear = {}
+
+			-- Initialisierung der Überwachung
+			for _, Breakable in ipairs(Breakables:GetChildren()) do
+				debugPrint("Processing Breakable:", Breakable.Name)
+				for _, Model in ipairs(Breakable:GetChildren()) do
+					if Model:IsA("MeshPart") and Model.MeshId ~= "" then
+						-- Fügt MeshPart-Objekte zur Liste hinzu, um MeshId später zu löschen
+						table.insert(meshPartsToClear, Model)
+					end
+				end
+			end
+
+			-- Löschen der MeshId für alle gesammelten MeshPart-Objekte
+			for _, Model in ipairs(meshPartsToClear) do
+				debugPrint("Clearing MeshId for Model:", Model.Name)
+				Model.MeshId = ""
+			end
+
+			-- Zurücksetzen der Liste für die nächste Überwachungsrunde
+			meshPartsToClear = {}
+		else
+			debugPrint("No Breakables found in Things.")
+		end
+	else
+		debugPrint("No __THINGS found in Workspace.")
+	end
+end
+
+local function improveFPS4ever()
+	local Breakables = DIRECTORY:FindFirstChild("Breakables")
+	if not Breakables then
+		debugPrint("No Breakables found in DIRECTORY.")
+		return
+	end
+	local BreakablesFolders = {
+		"Vaults",
+		"Coin Piles",
+		"Safes",
+		"Crates",
+		"Presents",
+		"Small Barrels",
+		"Large Barrels",
+		"OTHER",
+		"Chests",
+		"Diamonds",
+		"SPECIAL",
+		"Lucky Blocks"
+	}
+
+	debugPrint("Starting FPS improvement...")
+
+	-- Iterate through each folder in BreakablesFolders
+	for _, folderName in ipairs(BreakablesFolders) do
+		local Folder = Breakables:FindFirstChild(folderName)
+		if Folder then
+			debugPrint(string.format("Processing Folder: %s", folderName))
+
+			-- Iterate through each item in the folder
+			for itemIndex, Item in ipairs(Folder:GetChildren()) do
+				debugPrint(string.format("  Processing Item %d: %s", itemIndex, Item.Name))
+
+				-- Iterate through each child of the item
+				for stageIndex, Stage in ipairs(Item:GetChildren()) do
+					debugPrint(string.format("    Processing Stage %d: %s", stageIndex, Stage.Name))
+
+					-- Iterate through each part in the stage
+					for partIndex, Part in ipairs(Stage:GetChildren()) do
+						if Part:IsA("MeshPart") then
+							debugPrint(string.format("      Processing MeshPart %d: %s", partIndex, Part.Name))
+
+							-- Set the MeshId to an empty string to potentially reduce rendering load
+							Part.MeshId = ""
+							debugPrint(string.format("      Set MeshId to empty for %s", Part.Name))
+						end
+					end
+				end
+			end
+		else
+			debugPrint(string.format("Folder %s not found in Breakables.", folderName))
+		end
+	end
+
+	debugPrint("FPS improvement completed.")
+end
+
+local function improveluckytilesevent()
+	local Instance_Container = Things:FindFirstChild("__INSTANCE_CONTAINER")
+	if not Instance_Container then
+		debugPrint("__INSTANCE_CONTAINER not found in Things.")
+		return
+	end
+
+	debugPrint("Accessing Instance Container...")
+
+	local Active = Instance_Container:FindFirstChild("Active")
+	if not Active then
+		debugPrint("Active container not found in __INSTANCE_CONTAINER.")
+		return
+	end
+
+	debugPrint("Accessing Active container...")
+
+	local LuckyTilesInstance = Active:FindFirstChild("LuckyTilesInstance")
+	if not LuckyTilesInstance then
+		debugPrint("No LuckyTilesInstance found.")
+		return
+	end
+
+	debugPrint("LuckyTilesInstance found.")
+	local ListToDelete = {
+		"Gates",
+		"PARTS",
+		"Lighting",
+		"ZONE_GROUND",
+		"OUTER"
+	}
+	local Border = Workspace:FindFirstChild("DiscoBorder")
+	if Border then
+		Border:Destroy()
+		debugPrint("DiscoBorder destroyed.")
+	else
+		debugPrint("DiscoBorder not found.")
+	end
+
+	local Ground = Instance.new("Part")
+	Ground.Parent = Workspace
+	Ground.Rotation = Vector3.new(0, 90, 0)
+	Ground.Size = Vector3.new(325, 1, 1150)
+	Ground.Position = Vector3.new(800, 10, -12200)
+	Ground.Anchored = true -- Ensure the part is anchored
+
+	debugPrint("Ground part created with the following properties:")
+	debugPrint("Parent:", Ground.Parent)
+	debugPrint("Rotation:", Ground.Rotation)
+	debugPrint("Size:", Ground.Size)
+	debugPrint("Position:", Ground.Position)
+	debugPrint("Anchored:", Ground.Anchored)
+
+	for _, partName in ipairs(ListToDelete) do
+		local part = LuckyTilesInstance:FindFirstChild(partName)
+		if part then
+			debugPrint("Destroying", partName, "...")
+			part:Destroy()  -- Correct method to remove the object
+			debugPrint(partName, "destroyed.")
+		else
+			debugPrint(partName, "not found.")
+		end
+	end
+end
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Cpu Reduzer by Kitty Ware (Private)"})
+local Tab = Window:MakeTab({
+	Name = "Reduzer",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+Tab:AddButton({
+	Name = "Improve FPS",
+	Callback = function()
+		improveFPScurrenbreakables()
+	end    
+})
+
+Tab:AddButton({
+	Name = "Improve FPS 4ever",
+	Callback = function()
+		improveFPS4ever()
+	end    
+})
+
+Tab:AddButton({
+	Name = "Lucky tiles event",
+	Callback = function()
+		improveluckytilesevent()
+	end    
+})
+
+Tab:AddToggle({
+	Name = "Debug Mode",
+	Default = false,
+	Callback = function(Value)
+		_G.DebugMode = Value
+	end    
+})
