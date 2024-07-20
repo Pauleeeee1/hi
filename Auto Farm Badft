@@ -15,8 +15,13 @@ local function GetHumanoid()
 	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 	local Humanoid = Character:WaitForChild("Humanoid")
 
-	warn("Found Humanoid")
-	return Humanoid, HumanoidRootPart
+	if Humanoid and HumanoidRootPart then
+		warn("Found Humanoid")
+		return Humanoid, HumanoidRootPart
+	else
+		warn("Humanoid or HumanoidRootPart not found")
+		return nil, nil
+	end
 end
 
 local function MonitorHumanoidPosition()
@@ -27,7 +32,7 @@ local function MonitorHumanoidPosition()
 	HumanoidRootPart:GetPropertyChangedSignal("CFrame"):Connect(function()
 		local currentPosition = HumanoidRootPart.Position
 		if currentPosition ~= lastPosition then
-			warn("Humanoid position changed")
+			--warn("Humanoid position changed")
 			-- You can add more logic here to handle the position change
 			lastPosition = currentPosition
 		end
@@ -101,11 +106,19 @@ end
 
 -- Define a function to teleport the player
 local function teleportPlayer(position)
-	wait(0.2)
-	local Player = Players.LocalPlayer
-	local HumanoidRootPart = game.Players.LocalPlayer.Character.HumanoidRootPart
-	HumanoidRootPart.CFrame = CFrame.new(position)
+	wait(0.3)
+	local Humanoid, HumanoidRootPart = GetHumanoid()
+	if not HumanoidRootPart then
+		task.wait(0.1)
+		Humanoid, HumanoidRootPart = GetHumanoid()
+	end
+	if HumanoidRootPart then
+		HumanoidRootPart.CFrame = CFrame.new(position)
+	else
+		warn("Failed to find HumanoidRootPart for teleportation.")
+	end
 end
+
 
 function findgoldtrigger()
 	local mainStages = getStages()
@@ -173,12 +186,14 @@ local function autoFarm()
 					local position = child2.Position + TP_OFFSET
 					teleportPlayer(position)
 					Currenstage = Currenstage + 1
-					--warn("Going to stage: "..Currenstage)
+					warn("Going to stage: "..Currenstage)
 					task.wait(2)
 					if Currenstage == 4 then
 						collectgoldchest()
 						wait(0.5)
 					end
+					
+					
 					if child.Name == "CaveStage10" then
 						Currenstage = 0
 					end
