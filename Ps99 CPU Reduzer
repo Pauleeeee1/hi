@@ -14,6 +14,27 @@ debugPrint("Things:", Things)
 local DIRECTORY = ReplicatedStorage:FindFirstChild("__DIRECTORY")
 debugPrint("DIRECTORY", DIRECTORY)
 
+local function Currentworld()
+	local Map = nil
+
+	if Workspace:FindFirstChild("Map1") then
+		print("Map1 is present")
+		Map = Workspace:FindFirstChild("Map1")
+
+	elseif Workspace:FindFirstChild("Map2") then
+		print("Map2 is present")
+		Map = Workspace:FindFirstChild("Map2")
+	elseif Workspace:FindFirstChild("Map3") then
+		print("Map3 is present")
+		Map = Workspace:FindFirstChild("Map3")
+	else
+		print("No map is present")
+	end
+
+	return Map
+end
+
+
 local function improveFPScurrenbreakables()
 	if Things then
 		local Breakables = Things:FindFirstChild("Breakables")
@@ -107,73 +128,21 @@ local function improveFPS4ever()
 	debugPrint("FPS improvement completed.")
 end
 
-local function improveluckytilesevent()
-	local Instance_Container = Things:FindFirstChild("__INSTANCE_CONTAINER")
-	if not Instance_Container then
-		debugPrint("__INSTANCE_CONTAINER not found in Things.")
-		return
-	end
-
-	debugPrint("Accessing Instance Container...")
-
-	local Active = Instance_Container:FindFirstChild("Active")
-	if not Active then
-		debugPrint("Active container not found in __INSTANCE_CONTAINER.")
-		return
-	end
-
-	debugPrint("Accessing Active container...")
-
-	local LuckyTilesInstance = Active:FindFirstChild("LuckyTilesInstance")
-	if not LuckyTilesInstance then
-		debugPrint("No LuckyTilesInstance found.")
-		return
-	end
-
-	debugPrint("LuckyTilesInstance found.")
-	local ListToDelete = {
-		"Gates",
-		"PARTS",
-		"Lighting",
-		"ZONE_GROUND",
-		"OUTER"
-	}
-	local Border = Workspace:FindFirstChild("DiscoBorder")
-	if Border then
-		Border:Destroy()
-		debugPrint("DiscoBorder destroyed.")
-	else
-		debugPrint("DiscoBorder not found.")
-	end
-
-	local Ground = Instance.new("Part")
-	Ground.Parent = Workspace
-	Ground.Rotation = Vector3.new(0, 90, 0)
-	Ground.Size = Vector3.new(325, 1, 1150)
-	Ground.Position = Vector3.new(800, 10, -12200)
-	Ground.Anchored = true -- Ensure the part is anchored
-
-	debugPrint("Ground part created with the following properties:")
-	debugPrint("Parent:", Ground.Parent)
-	debugPrint("Rotation:", Ground.Rotation)
-	debugPrint("Size:", Ground.Size)
-	debugPrint("Position:", Ground.Position)
-	debugPrint("Anchored:", Ground.Anchored)
-
-	for _, partName in ipairs(ListToDelete) do
-		local part = LuckyTilesInstance:FindFirstChild(partName)
-		if part then
-			debugPrint("Destroying", partName, "...")
-			part:Destroy()  -- Correct method to remove the object
-			debugPrint(partName, "destroyed.")
-		else
-			debugPrint(partName, "not found.")
+local function ImproveMap()
+	local Map = Currentworld()
+	for _, child in ipairs(Map:GetChildren()) do
+		for _, child2 in ipairs(child:GetChildren()) do
+			if child2.Name == "PARTS_LOD" then
+				child2:Destroy()
+			end
 		end
 	end
 end
 
+
+
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "Cpu Reduzer by Kitty Ware (Private)"})
+local Window = OrionLib:MakeWindow({Name = "Cpu Reduzer by Paule"})
 local Tab = Window:MakeTab({
 	Name = "Reduzer",
 	Icon = "rbxassetid://4483345998",
@@ -191,15 +160,13 @@ Tab:AddButton({
 	Name = "Improve FPS 4ever",
 	Callback = function()
 		improveFPS4ever()
+		ImproveMap()
 	end    
 })
 
-Tab:AddButton({
-	Name = "Lucky tiles event",
-	Callback = function()
-		improveluckytilesevent()
-	end    
-})
+
+
+
 
 Tab:AddToggle({
 	Name = "Debug Mode",
