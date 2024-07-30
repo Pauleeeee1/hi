@@ -13,7 +13,7 @@ safetynet.Parent = Workspace
 safetynet.Position = Vector3.new(-2300, 110, 1750)
 safetynet.Size = Vector3.new(1000, 1, 1000)
 
-wait(0.1)
+wait(_G.WaitGameLoad)
 
 local CubesToCollect = {
 	["Luck Cube"] = {collect = true, count = 0},
