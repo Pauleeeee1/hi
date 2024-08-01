@@ -1,11 +1,17 @@
 wait(10)
-print("ASD")
 repeat wait() until game:IsLoaded()
 
 local Workspace = game:GetService("Workspace")
 local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TeleportService = game:GetService("TeleportService")
+
+
+local player = Players.LocalPlayer
+local maxAttempts = 5
+local waitTime = 2
+
+
 
 repeat wait() until game:IsLoaded()
 
@@ -63,65 +69,73 @@ collectchest()
 wait(3)
 
 
+
+-- Function to attempt server hopping
 local function attemptServerHop()
 	debugPrint("Attempting server hop...")
 
-	local Player = game.Players.LocalPlayer    
-	local Http = game:GetService("HttpService")
-	local TeleportService = game:GetService("TeleportService")
-	local Api = "https://games.roblox.com/v1/games/"
+	local placeId = game.PlaceId
+	local serversApi = "https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"
+	local nextPageCursor = nil
+	local currentJobId = game.JobId
 
-	local placeId, currentJobId = game.PlaceId, game.JobId
-	local serversUrl = Api .. placeId .. "/servers/Public?sortOrder=Desc&limit=100"
+	-- Function to list servers with optional pagination
+	local function listServers(cursor)
+		local url = serversApi
+		if cursor then
+			url = url .. "&cursor=" .. cursor
+		end
 
-	local function ListServers(cursor)
-		local url = serversUrl .. (cursor and "&cursor=" .. cursor or "")
-		local response = Http:GetAsync(url)
-		return Http:JSONDecode(response)
+		local response = HttpService:JSONDecode(game:HttpGet(url))
+		return response
 	end
+	
+	local availableServers = {}
 
-	local nextPageCursor
-	local serverToTeleport
-
+	-- Fetch server list and find available servers
 	repeat
-		local servers = ListServers(nextPageCursor)
-		for _, server in ipairs(servers.data) do
-			if server.playing < server.maxPlayers and server.id ~= currentJobId then
-				local success, result = pcall(function()
-					TeleportService:TeleportToPlaceInstance(placeId, server.id, Player)
-				end)
-				if success then
-					serverToTeleport = server
-					break
+		local serverList = listServers(nextPageCursor)
+		if serverList and serverList.data then
+			for _, server in ipairs(serverList.data) do
+				if server.playing < server.maxPlayers and server.id ~= currentJobId then
+					table.insert(availableServers, server)
 				end
 			end
+			nextPageCursor = serverList.nextPageCursor
 		end
-		nextPageCursor = servers.nextPageCursor
-	until serverToTeleport or not nextPageCursor
+	until not nextPageCursor
 
-	if serverToTeleport then
-		debugPrint("Successfully hopped to server")
-		return true
+	-- Teleport to a random available server
+	if #availableServers > 0 then
+		local randomServer = availableServers[math.random(#availableServers)]
+		local success, errorMessage = pcall(function()
+			TeleportService:TeleportToPlaceInstance(placeId, randomServer.id, player)
+		end)
+		if success then
+			debugPrint("Successfully hopped to server")
+			return true
+		else
+			debugPrint("Teleport failed: " .. errorMessage)
+			return false
+		end
 	else
-		debugPrint("Failed to find a suitable server to teleport.")
+		debugPrint("No suitable server found to teleport.")
 		return false
 	end
 end
 
+-- Attempt server hop with retries
 local serverHopped = false
-local maxAttempts = 5 -- Maximal five attempts for server hop
-
--- Attempt server hop up to maxAttempts times
 for attempt = 1, maxAttempts do
 	serverHopped = attemptServerHop()
 	if serverHopped then
 		break
 	end
-	wait(2) -- Wait 2 seconds before attempting again
+	wait(waitTime) -- Wait before retrying
 end
 
--- If no server hop was successful, perform an alternative action
+-- Alternative action if no successful server hop
 if not serverHopped then
-	debugPrint("No suitable server found after multiple attempts, performing alternative action...")
-	attemptServerHop()
+	debugPrint("No suitable server found or no cubes left after multiple attempts, performing alternative action...")
+	-- Insert your alternative action here if needed
 end
