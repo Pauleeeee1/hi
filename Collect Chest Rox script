@@ -1,0 +1,115 @@
+wait(10)
+repeat wait() until game:IsLoaded()
+
+local Workspace = game:GetService("Workspace")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
+
+repeat wait() until game:IsLoaded()
+
+_G.DebugPrint = false
+
+
+local function debugPrint(...)
+	if _G.DebugPrint then
+		print("[DEBUG]", ...)
+	end
+end
+
+local function GetHumanoid()
+	local Player = Players.LocalPlayer
+	local Character = Player.Character or Player.CharacterAdded:Wait()
+	local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+	local Humanoid = Character:WaitForChild("Humanoid")
+
+	if Humanoid and HumanoidRootPart and Humanoid.Health > 1 then
+		warn("Found Humanoid")
+		return Humanoid, HumanoidRootPart
+	else
+		warn("Humanoid or HumanoidRootPart not found")
+		return nil, nil
+	end
+end
+
+local function collectchest()
+	for _, descendant in ipairs(workspace:GetDescendants()) do
+		if descendant:IsA("ProximityPrompt") then
+			fireproximityprompt(descendant)
+		end
+	end
+end
+local Humanoid = GetHumanoid()
+Humanoid.Health = 0
+wait(1)
+
+local Humanoid = GetHumanoid()
+if Humanoid then
+	-- Wenn das Humanoid-Objekt vorhanden ist, führe dies aus
+	print("Humanoid gefunden!")
+else
+	-- Wenn kein Humanoid-Objekt vorhanden ist, warte, bis es erscheint
+	repeat
+		wait(0.1)  -- Kurze Pause, um die Schleife nicht zu überlasten
+		Humanoid = GetHumanoid()
+	until Humanoid
+
+	-- Sobald der Humanoid vorhanden ist, führe dies aus
+	print("Humanoid gefunden nach dem Warten!")
+end
+
+collectchest()
+wait(3)
+
+local function attemptServerHop()
+	debugPrint("Attempting server hop...")
+
+	local placeId = game.PlaceId
+	local serversApi = "https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"
+	local nextPageCursor = nil
+
+	local function listServers(cursor)
+		local url = serversApi
+		if cursor then
+			url = url .. "&cursor=" .. cursor
+		end
+
+		local response = HttpService:JSONDecode(game:HttpGet(url))
+		return response
+	end
+
+	local serverToTeleport
+	repeat
+		local serverList = listServers(nextPageCursor)
+		if serverList and serverList.data and #serverList.data > 0 then
+			serverToTeleport = serverList.data[1]
+			nextPageCursor = serverList.nextPageCursor
+		end
+	until serverToTeleport or not nextPageCursor
+
+	if serverToTeleport then
+		TeleportService:TeleportToPlaceInstance(placeId, serverToTeleport.id, player)
+		serverhopped = true
+		debugPrint("Successfully hopped to server")
+	else
+		debugPrint("Failed to find a suitable server to teleport.")
+	end
+end
+
+local serverhopped = false
+local maxAttempts = 5 -- Maximal five attempts for server hop
+
+-- Attempt server hop up to maxAttempts times
+for attempt = 1, maxAttempts do
+	attemptServerHop()
+	if serverhopped then
+		break
+	end
+	wait(2) -- Wait 2 seconds before attempting again
+end
+
+-- If no server hop was successful, perform an alternative action
+if not serverhopped then
+	debugPrint("No suitable server found or no cubes left after multiple attempts, performing alternative action...")
+	-- Insert your alternative action here if needed
+end
