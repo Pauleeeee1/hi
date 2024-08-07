@@ -1,4 +1,4 @@
-
+print("made with love♥️")
 local function ROX()
 	wait(1)
 	repeat wait() until game:IsLoaded()
@@ -46,6 +46,9 @@ local function ROX()
 	end
 
 	local function collectchest()
+		for i = 1,12 do
+			game:GetService("ReplicatedStorage"):WaitForChild("SharedModules"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlayTimeRewardService"):WaitForChild("RF"):WaitForChild("claim"):InvokeServer(i)
+		end
 		local ChestFolder = GetChestFolder()
 		if not ChestFolder then
 			warn("ChestFolder not found")
