@@ -1,4 +1,5 @@
 print("made with love♥️")
+
 local function ROX()
 	wait(1)
 	repeat wait() until game:IsLoaded()
@@ -12,9 +13,7 @@ local function ROX()
 	local maxAttempts = 5
 	local waitTime = 2
 
-	repeat wait() until game:IsLoaded()
-
-	_G.DebugPrint = false
+	_G.DebugPrint = true  -- Enable debug printing
 
 	local function debugPrint(...)
 		if _G.DebugPrint then
@@ -29,10 +28,10 @@ local function ROX()
 		local Humanoid = Character:WaitForChild("Humanoid")
 
 		if Humanoid and HumanoidRootPart and Humanoid.Health > 1 then
-			warn("Found Humanoid")
+			debugPrint("Found Humanoid")
 			return Humanoid, HumanoidRootPart
 		else
-			warn("Humanoid or HumanoidRootPart not found")
+			debugPrint("Humanoid or HumanoidRootPart not found")
 			return nil, nil
 		end
 	end
@@ -40,18 +39,22 @@ local function ROX()
 	local function GetChestFolder()
 		for _, child in ipairs(Workspace:GetChildren()) do
 			if child.Name == "Components" and not child:FindFirstChild("AfkZones") then
+				debugPrint("Found ChestFolder")
 				return child
 			end
 		end
+		debugPrint("ChestFolder not found")
+		return nil
 	end
 
 	local function collectchest()
-		for i = 1,12 do
+		for i = 1, 12 do
 			game:GetService("ReplicatedStorage"):WaitForChild("SharedModules"):WaitForChild("Knit"):WaitForChild("Services"):WaitForChild("PlayTimeRewardService"):WaitForChild("RF"):WaitForChild("claim"):InvokeServer(i)
+			debugPrint("Claimed PlayTimeReward for index", i)
 		end
 		local ChestFolder = GetChestFolder()
 		if not ChestFolder then
-			warn("ChestFolder not found")
+			debugPrint("ChestFolder not found, cannot collect chests")
 			return
 		end
 
@@ -63,12 +66,18 @@ local function ROX()
 					local open = RF:FindFirstChild("open")
 					if open then
 						open:InvokeServer()
+						debugPrint("Opened LootCrate:", crate.Name)
+					else
+						debugPrint("No 'open' method found in LootCrate:", crate.Name)
 					end
+				else
+					debugPrint("No 'RF' found in LootCrate:", crate.Name)
 				end
+			else
+				debugPrint("No 'LootCrate' found in crate:", crate.Name)
 			end
 		end
 	end
-
 
 	local function getObject()
 		local objects = {
@@ -84,10 +93,10 @@ local function ROX()
 	local function allObjectsLoaded(objects)
 		for i, obj in ipairs(objects) do
 			if not obj then
-				print("Object " .. i .. " is not loaded yet.")
+				debugPrint("Object " .. i .. " is not loaded yet.")
 				return false
 			else
-				print("Object " .. i .. " is loaded: " .. tostring(obj))
+				debugPrint("Object " .. i .. " is loaded: " .. tostring(obj))
 			end
 		end
 		return true
@@ -96,30 +105,31 @@ local function ROX()
 	local objects = getObject()
 	repeat
 		wait(0.1)
-		print("Waiting for all objects to load...")
+		debugPrint("Waiting for all objects to load...")
 		for i, obj in ipairs(objects) do
-			print("Object " .. i .. ": " .. tostring(obj))
+			debugPrint("Object " .. i .. ": " .. tostring(obj))
 		end
 	until allObjectsLoaded(objects)
 
-	print("All objects are loaded!")
+	debugPrint("All objects are loaded!")
 	wait()
 
-	local Humanoid = GetHumanoid()
+	local Humanoid, HumanoidRootPart = GetHumanoid()
 	if Humanoid then
 		Humanoid.Health = 0
+		debugPrint("Set Humanoid Health to 0")
 	end
 	wait()
 
-	Humanoid = GetHumanoid()
+	Humanoid, HumanoidRootPart = GetHumanoid()
 	if Humanoid then
-		print("Humanoid gefunden!")
+		debugPrint("Humanoid found after respawn!")
 	else
 		repeat
 			wait(0.1)
-			Humanoid = GetHumanoid()
+			Humanoid, HumanoidRootPart = GetHumanoid()
 		until Humanoid
-		print("Humanoid gefunden nach dem Warten!")
+		debugPrint("Humanoid found after waiting!")
 	end
 
 	collectchest()
@@ -190,26 +200,6 @@ local function ROX()
 		-- Insert your alternative action here if needed
 	end
 end
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-
-local AllowedUserNames = {
-	"pauledropper1",
-	"Roxfarm2",
-	"Roxfarm3",
-	"Roxfarm4"
-}
-
-local function isAllowedUser()
-	for _, username in ipairs(AllowedUserNames) do
-		if LocalPlayer.Name == username then
-			return true
-		end
-	end
-	return false
-end
-
 
 print("Access granted.")
 ROX()
