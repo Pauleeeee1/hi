@@ -1,3 +1,4 @@
+
 local function ROX()
 	wait(1)
 	repeat wait() until game:IsLoaded()
@@ -36,13 +37,35 @@ local function ROX()
 		end
 	end
 
-	local function collectchest()
-		for _, descendant in ipairs(workspace:GetDescendants()) do
-			if descendant:IsA("ProximityPrompt") then
-				fireproximityprompt(descendant)
+	local function GetChestFolder()
+		for _, child in ipairs(Workspace:GetChildren()) do
+			if child.Name == "Components" and not child:FindFirstChild("AfkZones") then
+				return child
 			end
 		end
 	end
+
+	local function collectchest()
+		local ChestFolder = GetChestFolder()
+		if not ChestFolder then
+			warn("ChestFolder not found")
+			return
+		end
+
+		for _, crate in ipairs(ChestFolder:GetChildren()) do
+			local LootCrate = crate:FindFirstChild("LootCrate")
+			if LootCrate then
+				local RF = LootCrate:FindFirstChild("RF")
+				if RF then
+					local open = RF:FindFirstChild("open")
+					if open then
+						open:InvokeServer()
+					end
+				end
+			end
+		end
+	end
+
 
 	local function getObject()
 		local objects = {
@@ -77,13 +100,13 @@ local function ROX()
 	until allObjectsLoaded(objects)
 
 	print("All objects are loaded!")
-	wait(3)
+	wait()
 
 	local Humanoid = GetHumanoid()
 	if Humanoid then
 		Humanoid.Health = 0
 	end
-	wait(1)
+	wait()
 
 	Humanoid = GetHumanoid()
 	if Humanoid then
@@ -97,7 +120,7 @@ local function ROX()
 	end
 
 	collectchest()
-	wait(3)
+	wait()
 
 	local function attemptServerHop()
 		debugPrint("Attempting server hop...")
