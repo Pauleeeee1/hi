@@ -1,0 +1,152 @@
+-- Services and Modules
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Library = ReplicatedStorage.Library.Client
+local SaveModule = require(Library.Save)
+local EggCmds = require(Library.EggCmds)
+local HatchingCmds = require(Library.HatchingCmds)
+local MachineCmds = require(Library.MachineCmds)
+local InstanceZoneCmds = Library.InstanceZoneCmds
+local TradingCmds = require(Library.TradingCmds)
+
+-- Get inventory data
+local pets = SaveModule.Get().Inventory.Pet
+local Potions = SaveModule.Get().Inventory.Potion
+local Enchants = SaveModule.Get().Inventory.Enchant
+local Items = SaveModule.Get().Inventory.Item
+
+local SendMessage = TradingCmds.Message
+local SendTrade = TradingCmds.Request
+local SetReady = TradingCmds.SetReady
+local SetConfirm = TradingCmds.SetConfirmed
+local SetDecline = TradingCmds.Decline
+local SetItem = TradingCmds.SetItem
+
+-- Function to add pet based on command input
+local function addpet(petType)
+    local substringToFind = "Huge"
+    local petUID = nil
+
+    if petType:lower() == "huges" then
+        for uid, pet in pairs(pets) do
+            if string.find(pet.id, substringToFind) then
+                petUID = uid
+                break
+            end
+        end
+
+        if petUID then
+            warn("Adding Huge pet: " .. petUID)
+            SetItem("Pet", petUID, 1)
+        else
+            warn("No Huge pet found!")
+        end
+        return
+    end
+
+    for id, petData in pairs(pets) do
+        local petAmount = petData["_am"] or 1
+        local petName = petData["id"]
+
+        if petName ~= _G.PetToKeep then
+            warn("Trading pet: " .. petName .. " Amount: " .. tostring(petAmount))
+            
+            local success, err
+            local retries = 0
+            local maxRetries = 3
+            
+            repeat
+                success, err = pcall(function()
+                    SetItem("Pet", id, petAmount)
+                end)
+
+                if not success then
+                    retries = retries + 1
+                    warn("Failed to trade pet (Attempt " .. retries .. "). Retrying... Error: " .. tostring(err))
+                    task.wait(0.1)
+                end
+            until success or retries >= maxRetries
+
+            if not success then
+                warn("Failed to trade pet after " .. retries .. " attempts. Error: " .. tostring(err))
+            end
+        else
+            print("Found Good Pet to keep: " .. petName)
+        end
+    end
+end
+
+-- Commands array
+local Commands = {
+    "!trade",
+    "!say",
+    "!ready",
+    "!confirm",
+    "!decline",
+    "!add-pet",
+}
+
+-- Function to track the host player dynamically when they join
+local function getHostPlayer()
+    local hostPlayer = Players:FindFirstChild(_G.Main)
+    if hostPlayer then
+        warn("Host player found: " .. hostPlayer.Name)
+    else
+        warn("Host player not found yet, waiting for them to join...")
+    end
+    return hostPlayer
+end
+
+-- Monitor chat messages and respond to commands
+local function monitorChat(plr)
+    plr.Chatted:Connect(function(msg)
+        warn(plr.Name .. " said: " .. msg)
+
+        local hostPlayer = getHostPlayer()
+
+        if plr == hostPlayer then
+            for _, command in ipairs(Commands) do
+                if string.find(string.lower(msg), string.lower(command)) then
+                    warn("Command found: " .. command)
+
+                    if command == "!trade" then
+                        SendTrade(hostPlayer)
+                    elseif command == "!say" then
+                        local messageToSay = string.gsub(msg, "!say", "")
+                        SendMessage(messageToSay)
+                    elseif command == "!ready" then
+                        SetReady(true)
+                    elseif command == "!confirm" then
+                        SetConfirm(true)
+                    elseif command == "!decline" then
+                        SetDecline()
+                    elseif command == "!add-pet" then
+                        local petType = string.gsub(msg, "!add-pet", ""):gsub("^%s*(.-)%s*$", "%1") -- Trim whitespaces
+                        if petType and petType ~= "" then
+                            addpet(petType)
+                        else
+                            warn("Invalid pet type specified for adding!")
+                        end
+                    end
+                end
+            end
+        else
+            warn("Player is not the host, ignoring message.")
+        end
+    end)
+end
+
+-- Listen for player joining and update the host if necessary
+Players.PlayerAdded:Connect(function(plr)
+    if plr.Name == _G.Main then
+        warn("Host player joined: " .. plr.Name)
+        monitorChat(plr)
+    end
+end)
+
+-- Start with an initial attempt to find the host player
+local hostPlayer = getHostPlayer()
+if hostPlayer then
+    warn("Host player is already in the server.")
+    monitorChat(hostPlayer)
+end
