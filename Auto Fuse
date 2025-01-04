@@ -1,0 +1,47 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Library = ReplicatedStorage.Library.Client
+local SaveModule = require(Library.Save)
+
+local Inventory = SaveModule.Get().Inventory
+local pets = Inventory.Pet
+
+local petId
+for id, petData in pairs(pets) do
+    if petData["id"] == PET_TO_FUSE then
+        print("Found pet:")
+        if tonumber(petData["pt"]) == PET_TYPE then
+            if IS_SHINY then
+                if petData["sh"] then
+                    petId = id
+                    break
+                end
+            else
+                if not petData["sh"] then
+                    petId = id
+                    break
+                end
+            end
+        else
+            petId = id
+        end
+    end
+end
+
+if not petId then
+    print("Pet not found")
+    return
+else
+    print("Found pet: " .. petId)
+end
+
+
+while _G.autoFuse do
+    local args = {
+        [1] = {
+            [petId] = FUSE_AMOUNT
+        }
+    }
+
+    game:GetService("ReplicatedStorage").Network.FuseMachine_Activate:InvokeServer(unpack(args))
+    task.wait()
+end
