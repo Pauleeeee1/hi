@@ -1,0 +1,78 @@
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Network = ReplicatedStorage:WaitForChild("Network")
+local SaveModule = require(ReplicatedStorage.Library.Client.Save)
+
+-- Funktion, um Pet-Daten zu bekommen
+local function GetPetData(petName)
+    local petTable = {normal = {id = nil, amount = 0}, gold = {id = nil, amount = 0}}
+    local success, err = pcall(function()
+        for id, pet in pairs(SaveModule.Get().Inventory.Pet) do
+            if _G.debug then
+            end
+
+            if pet["id"] == petName and pet._am and not pet["sh"] then
+                if pet["pt"] == nil then
+                    petTable.normal.id = id
+                    petTable.normal.amount = pet._am
+                    if _G.debug then
+                        print("Normal Pet gefunden: ID="..id..", Menge="..pet._am)
+                    end
+                elseif pet["pt"] == 1 then
+                    petTable.gold.id = id
+                    petTable.gold.amount = pet._am
+                    if _G.debug then
+                        print("Gold Pet gefunden: ID="..id..", Menge="..pet._am)
+                    end
+                end
+            end
+        end
+    end)
+
+    if not success and _G.debug then
+        print("Fehler beim Abrufen der Pet-Daten: ", err)
+    end
+
+    return petTable
+end
+
+-- Schleife für regelmäßigen Scan und Maschinenaufrufe
+while _G.test do
+    if _G.debug then print("Starte neuen Scan...") end
+    
+    -- Für jedes Pet in der Liste _G.Pet
+    for _, petName in ipairs(_G.Pet) do
+        local petData = GetPetData(petName)
+
+        if petData.gold.id and petData.gold.amount > 20 then
+            local success, err = pcall(function()
+                if _G.debug then
+                    print("Bereite RainbowMachine-Aufruf vor für Gold Pet ID: "..petData.gold.id)
+                end
+                Network:WaitForChild("RainbowMachine_Activate"):InvokeServer(petData.gold.id, 2)
+            end)
+            if not success and _G.debug then
+                print("Fehler beim Aufrufen der RainbowMachine für Pet: "..petName..", Fehler: ", err)
+            end
+
+        elseif petData.normal.id and petData.normal.amount > 10 then
+            local success, err = pcall(function()
+                if _G.debug then
+                    print("Bereite GoldMachine-Aufruf vor für Normal Pet ID: "..petData.normal.id)
+                end
+                Network:WaitForChild("GoldMachine_Activate"):InvokeServer(petData.normal.id, 1)
+            end)
+            if not success and _G.debug then
+                print("Fehler beim Aufrufen der GoldMachine für Pet: "..petName..", Fehler: ", err)
+            end
+
+        else
+            if _G.debug then
+                print("Pet '"..petName.."' nicht gefunden oder zu wenig Pets")
+            end
+        end
+    end
+    
+    if _G.debug then print("Warte 0.1 Sekunden auf den nächsten Scan...") end
+    task.wait(0.1) -- Kleine Pause zwischen den Scans
+end
