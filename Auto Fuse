@@ -1,3 +1,4 @@
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Library = ReplicatedStorage.Library.Client
 local SaveModule = require(Library.Save)
@@ -7,10 +8,10 @@ local pets = Inventory.Pet
 
 local petId
 for id, petData in pairs(pets) do
-    if petData["id"] == PET_TO_FUSE then
+    if petData["id"] == _G.PET_TO_FUSE then
         print("Found pet:")
-        if tonumber(petData["pt"]) == PET_TYPE then
-            if IS_SHINY then
+        if tonumber(petData["pt"]) == _G._G.PET_TYPE then
+            if _G.IS_SHINY then
                 if petData["sh"] then
                     petId = id
                     break
@@ -38,7 +39,7 @@ end
 while _G.autoFuse do
     local args = {
         [1] = {
-            [petId] = FUSE_AMOUNT
+            [petId] = _G.FUSE_AMOUNT
         }
     }
 
