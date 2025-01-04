@@ -10,7 +10,7 @@ local petId
 for id, petData in pairs(pets) do
     if petData["id"] == _G.PET_TO_FUSE then
         print("Found pet:")
-        if tonumber(petData["pt"]) == _G._G.PET_TYPE then
+        if tonumber(petData["pt"]) == _G.PET_TYPE then
             if _G.IS_SHINY then
                 if petData["sh"] then
                     petId = id
